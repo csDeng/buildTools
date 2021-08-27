@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@vue/compiler-sfc": "^3.2.6",
+    "koa": "^2.13.1",
+    "vue": "^3.2.6"
+  }
+}

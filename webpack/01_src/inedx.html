@@ -1,0 +1,65 @@
+<script>
+    /**
+     * @文件目的
+     *  脱离node环境，在浏览器跑通 
+     * exports.default
+     * require
+     * 
+     **/
+    /**
+     * 模拟导出
+     * 让字符串运行的方式
+     * 1. eval运行Es5代码
+     * 2. new Function
+     * 
+     * */
+
+    /*
+    eval(`exports.default = function(a,b){ return a+b; }`);
+     为避免变量污染，把上行代码改成IIFE方式
+
+    */
+     /**
+      * 模拟require
+        var add = require('add.js').default
+        console.log(add(2,5))
+    */
+    //  function require(file){
+    //     let exports = {};
+    //     (function(exports, code){
+    //         eval(code)
+    //     })(
+    //         exports,
+    //         "exports.default = function(a,b){ return a+b; }"
+    //     );
+    //     return exports;
+    //  };
+
+
+     /**
+      * webpack核心
+      * 模拟模块
+      * 
+      **/ 
+     (function(list){
+        function require(file){
+            let exports = {};
+            (function(exports, code){
+                // console.log(code)
+                eval(code);
+            })(
+                exports,
+                list[file]
+            );
+            return exports;
+        };
+        // 入口
+        require('index.js')
+     })({
+         'index.js':`
+            var add = require('add.js').default;
+            console.log(add(3,6));
+         `,
+        'add.js':` exports.default = function add(a,b){ return a+b;};`
+     })
+</script>
