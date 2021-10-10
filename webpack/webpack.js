@@ -35,6 +35,10 @@ function getModuleInfo(file) {
          * 将import a from b 可以看到ImportDeclaration
          * @param {*} param 
          */
+
+        /**
+         * 观察者 
+         */
         ImportDeclaration( {node} ){
             // console.log('node:\r\n', node)
             const dirname = path.dirname(file)

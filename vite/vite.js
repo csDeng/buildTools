@@ -1,7 +1,11 @@
 const Koa = require('koa')
 const fs = require('fs')
 const path = require('path')
+
+// 分析sfc组件
 const compilerSfc = require('@vue/compiler-sfc')
+
+// 渲染dom
 const compilerDom = require('@vue/compiler-dom')
 const app = new Koa()
 
@@ -19,9 +23,8 @@ function rewriteImport(content){
 
 
 app.use(async ctx=>{
-    const { url, query } = ctx
-    // console.log('url:'+url, '\r\n query:')
-    // console.log(query)
+    const { url, query} = ctx.request
+    // console.log('url:'+url, '\r\n query-type:',query.type)
 
     // 首页
     if( url === '/'){
@@ -34,6 +37,9 @@ app.use(async ctx=>{
         <script`)
 
         ctx.body = content
+    }
+    else if( url==='/test'){
+        ctx.body = query
     }
     else if(url.endsWith('.js')){
         // 返回js
@@ -74,6 +80,7 @@ app.use(async ctx=>{
         // console.log('p=',p)
         const { descriptor } = compilerSfc.parse(fs.readFileSync(p, "utf-8"));
         // console.log("descriptor", descriptor);
+        
         if (!query.type) {
           // 第一步 vue文件 => template script  (compiler-sfc)
           // descriptor.script => js + template生成render部分
@@ -92,7 +99,7 @@ app.use(async ctx=>{
           const template = descriptor.template;
           const render = compilerDom.compile(template.content, { mode: "module" });
           ctx.type = "application/javascript";
-          // console.log('render',render)
+        //   console.log('render',render)
           ctx.body = rewriteImport(render.code);
         }
       }
@@ -100,16 +107,15 @@ app.use(async ctx=>{
       else if (url.endsWith(".css")) {
         const p = path.resolve(__dirname, 'src', url.slice(1));
         const file = fs.readFileSync(p, "utf-8");
-    
         // css 转化为 js代码
         // 利用js 添加一个 style标签
         const content = `
-        const css = "${file.replace(/\n/g, "")}"
-        let link = document.createElement('style')
-        link.setAttribute('type', 'text/css')
-        document.head.appendChild(link)
-        link.innerHTML = css
-        export default css
+            const css = "${file.replace(/\r\n/g, "")}"
+            let link = document.createElement('style')
+            link.setAttribute('type', 'text/css')
+            document.head.appendChild(link)
+            link.innerHTML = css
+            export default css
         `;
         ctx.type = "application/javascript";
         ctx.body = content;
